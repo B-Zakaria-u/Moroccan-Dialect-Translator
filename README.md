@@ -8,6 +8,7 @@ A modern, interactive web interface for translating English text to Moroccan Ara
 - 💬 Chat-style interface
 - ✨ Smooth animations and modern UI
 - 📱 Responsive design
+- 📸 Image translation
 
 ## Prerequisites
 
@@ -36,7 +37,7 @@ A modern, interactive web interface for translating English text to Moroccan Ara
    npm run dev
    ```
    
-   The app will be available at `http://localhost:5173`
+   The app will be available at `http://localhost/Moroccan-Dialect-Translator`
 
 ## Build for Production
 
@@ -48,10 +49,10 @@ The production-ready files will be in the `dist` folder.
 
 ## Deployment
 
-### Vercel (Recommended)
+### Render
 
 1. Push your code to GitHub
-2. Import the project in Vercel
+2. Import the project in Render
 3. Set the environment variable:
    - `VITE_API_URL`: Your deployed backend URL
 4. Deploy!
@@ -64,7 +65,8 @@ The production-ready files will be in the `dist` folder.
 
 ## Technologies
 
-- React 18
+- React
+- Three.js
 - Vite
-- Axios
 - CSS3 with modern animations
+
