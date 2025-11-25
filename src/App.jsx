@@ -27,7 +27,7 @@ function App() {
         setLoading(true)
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://moroccan-dialect-translator-backend.onrender.com'
             const response = await fetch(`${apiUrl}/api/translator/translate`, {
                 method: 'POST',
                 headers: {
