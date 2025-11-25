@@ -81,7 +81,7 @@ function App() {
                                     {msg.sender === 'bot' ? '✨' : '👤'}
                                 </div>
                                 <div className="message-content">
-                                    <div className="user-name">{msg.sender === 'bot' ? 'Gemini' : 'You'}</div>
+                                    <div className="user-name">{msg.sender === 'bot' ? 'Moroccan Translator' : 'You'}</div>
                                     {msg.text}
                                 </div>
                             </div>
