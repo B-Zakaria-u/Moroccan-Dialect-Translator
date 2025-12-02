@@ -4,11 +4,13 @@ import './index.css'
 
 function App() {
     const [messages, setMessages] = useState([
-        { sender: 'bot', text: 'Salam! I can translate text or images to Darija. Type or upload an image!' }
+        { sender: 'bot', text: 'Salam! I can translate text, images, or audio to Darija. Type, upload, or record!' }
     ])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null)
+    const [isRecording, setIsRecording] = useState(false)
+    const [mediaRecorder, setMediaRecorder] = useState(null)
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
 
@@ -129,6 +131,84 @@ function App() {
         }
     }
 
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const recorder = new MediaRecorder(stream)
+            const chunks = []
+
+            recorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    chunks.push(e.data)
+                }
+            }
+
+            recorder.onstop = async () => {
+                const audioBlob = new Blob(chunks, { type: 'audio/webm' })
+                await handleAudioUpload(audioBlob)
+                stream.getTracks().forEach(track => track.stop())
+            }
+
+            recorder.start()
+            setMediaRecorder(recorder)
+            setIsRecording(true)
+        } catch (error) {
+            console.error('Error accessing microphone:', error)
+            alert('Could not access microphone. Please check permissions.')
+        }
+    }
+
+    const stopRecording = () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop()
+            setIsRecording(false)
+            setMediaRecorder(null)
+        }
+    }
+
+    const handleAudioUpload = async (audioBlob) => {
+        const userMessage = {
+            sender: 'user',
+            text: '🎤 [Audio Message]',
+        }
+        setMessages(prev => [...prev, userMessage])
+        setLoading(true)
+
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://moroccan-dialect-translator-backend.onrender.com'
+            const formData = new FormData()
+            // Append with a filename so the backend treats it as a file
+            formData.append('audio', audioBlob, 'recording.webm')
+
+            const response = await fetch(`${apiUrl}/api/translator/translate-audio`, {
+                method: 'POST',
+                body: formData,
+            })
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`)
+            }
+
+            const data = await response.json()
+
+            const botMessage = {
+                sender: 'bot',
+                text: data.translation || '(No translation received)',
+                transcription: data.transcription
+            }
+            setMessages(prev => [...prev, botMessage])
+        } catch (error) {
+            console.error(error)
+            const errorMessage = {
+                sender: 'bot',
+                text: 'Sorry, I encountered an error processing the audio.'
+            }
+            setMessages(prev => [...prev, errorMessage])
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <div className="app-container">
             <Background3D />
@@ -148,6 +228,11 @@ function App() {
                                     <div className="user-name">{msg.sender === 'bot' ? 'Moroccan Translator' : 'You'}</div>
                                     {msg.image && (
                                         <img src={msg.image} alt="Uploaded" style={{ maxWidth: '300px', borderRadius: '8px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                                    )}
+                                    {msg.transcription && (
+                                        <div style={{ fontSize: '0.9em', opacity: 0.8, marginBottom: '4px', fontStyle: 'italic' }}>
+                                            "{msg.transcription}"
+                                        </div>
                                     )}
                                     {msg.text}
                                 </div>
@@ -196,21 +281,48 @@ function App() {
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            disabled={loading}
+                            disabled={loading || isRecording}
                             style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
+                            title="Upload Image"
                         >
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="#a1a1aa" />
                             </svg>
                         </button>
+
+                        <button
+                            type="button"
+                            onMouseDown={startRecording}
+                            onMouseUp={stopRecording}
+                            onMouseLeave={stopRecording}
+                            disabled={loading}
+                            style={{
+                                background: isRecording ? 'rgba(239, 68, 68, 0.2)' : 'transparent',
+                                border: isRecording ? '1px solid #ef4444' : 'none',
+                                borderRadius: '50%',
+                                cursor: 'pointer',
+                                padding: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                marginRight: '8px',
+                                transition: 'all 0.2s ease'
+                            }}
+                            title="Hold to Record"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill={isRecording ? "#ef4444" : "#a1a1aa"} />
+                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill={isRecording ? "#ef4444" : "#a1a1aa"} />
+                            </svg>
+                        </button>
+
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Message or upload image..."
-                            disabled={loading}
+                            placeholder={isRecording ? "Recording..." : "Message, upload image, or hold mic..."}
+                            disabled={loading || isRecording}
                         />
-                        <button type="submit" disabled={loading || !input.trim()}>
+                        <button type="submit" disabled={loading || !input.trim() || isRecording}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor" />
                             </svg>
