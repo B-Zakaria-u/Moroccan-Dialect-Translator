@@ -100,7 +100,7 @@ function App() {
             const formData = new FormData()
             formData.append('image', selectedImage)
 
-            const response = await fetch(`${apiUrl}/api/translator/translate-image`, {
+            const response = await fetch(`${apiUrl}/api/translator/translate`, {
                 method: 'POST',
                 body: formData,
             })
@@ -169,7 +169,7 @@ function App() {
     const handleAudioUpload = async (audioBlob) => {
         const userMessage = {
             sender: 'user',
-            text: '🎤 [Audio Message]',
+            text: '🎤 Audio Message',
         }
         setMessages(prev => [...prev, userMessage])
         setLoading(true)
@@ -177,10 +177,10 @@ function App() {
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'https://moroccan-dialect-translator-backend.onrender.com'
             const formData = new FormData()
-            // Append with a filename so the backend treats it as a file
+
             formData.append('audio', audioBlob, 'recording.webm')
 
-            const response = await fetch(`${apiUrl}/api/translator/translate-audio`, {
+            const response = await fetch(`${apiUrl}/api/translator/translate`, {
                 method: 'POST',
                 body: formData,
             })
