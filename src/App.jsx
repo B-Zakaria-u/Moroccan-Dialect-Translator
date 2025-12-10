@@ -86,7 +86,6 @@ function App() {
 
         const userMessage = {
             sender: 'user',
-            text: '[Image uploaded]',
             image: URL.createObjectURL(selectedImage)
         }
         setMessages(prev => [...prev, userMessage])
@@ -280,7 +279,15 @@ function App() {
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={loading || isRecording}
-                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '8px',
+                                display: 'flex',
+                                marginLeft: '10px',
+                                alignItems: 'center'
+                            }}
                             title="Upload Image"
                         >
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
