@@ -10,6 +10,11 @@ A modern, interactive web interface for translating English text to Moroccan Ara
 - 📱 Responsive design
 - 📸 Image translation
 
+## 🌐 Deployment
+
+This shell aggregates the following applications:
+
+ - The application is accessible via this link : https://b-zakaria-u.github.io/Moroccan-Dialect-Translator/.
 ## Prerequisites
 
 - Node.js 16+ and npm
